@@ -3,7 +3,7 @@ module Rack
     class Client
       include AttrRequired, AttrOptional
       attr_required :identifier
-      attr_optional :secret, :private_key, :certificate, :redirect_uri, :scheme, :host, :port, :authorization_endpoint, :token_endpoint, :ssl_cert_file_or_dir, :use_system_ssl, :ssl_version
+      attr_optional :secret, :private_key, :certificate, :redirect_uri, :scheme, :host, :port, :authorization_endpoint, :token_endpoint, :ssl_cert_file_or_dir, :use_system_ssl
 
       def initialize(attributes = {})
         (required_attributes + optional_attributes).each do |key|
@@ -76,13 +76,11 @@ module Rack
         Rails.logger.error("OpenID: rack-oauth2: access_token!: certificate: #{certificate}")
         Rails.logger.error("OpenID: rack-oauth2: access_token!: use_system_ssl: #{use_system_ssl}")
         Rails.logger.error("OpenID: rack-oauth2: access_token!: ssl_cert_file_or_dir: #{ssl_cert_file_or_dir}")
-        Rails.logger.error("OpenID: rack-oauth2: access_token!: ssl_version: #{ssl_version}")
 
 
         http_client = Rack::OAuth2.http_client
         http_client.ssl_config.set_default_paths if use_system_ssl
         http_client.ssl_config.add_trust_ca(ssl_cert_file_or_dir) if ssl_cert_file_or_dir
-        http_client.ssl_config.ssl_version = ssl_version if ssl_version
 
         # NOTE:
         #  Using Array#estract_options! for backward compatibility.
