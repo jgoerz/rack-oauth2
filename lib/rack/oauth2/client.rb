@@ -3,7 +3,7 @@ module Rack
     class Client
       include AttrRequired, AttrOptional
       attr_required :identifier
-      attr_optional :secret, :private_key, :certificate, :redirect_uri, :scheme, :host, :port, :authorization_endpoint, :token_endpoint, :ssl_cert_file_or_dir, :use_system_ssl
+      attr_optional :secret, :private_key, :certificate, :redirect_uri, :scheme, :host, :port, :authorization_endpoint, :token_endpoint, :ssl_cert_file_or_dir, :use_system_ssl, :ssl_version
 
       def initialize(attributes = {})
         (required_attributes + optional_attributes).each do |key|
@@ -71,15 +71,26 @@ module Rack
       def access_token!(*args)
         headers, params = {}, @grant.as_json
 
+        # Have to use error or it doesn't show up in our logs
+        Rails.logger.error("OpenID: rack-oauth2: access_token!: private_key: #{private_key}")
+        Rails.logger.error("OpenID: rack-oauth2: access_token!: certificate: #{certificate}")
+        Rails.logger.error("OpenID: rack-oauth2: access_token!: use_system_ssl: #{use_system_ssl}")
+        Rails.logger.error("OpenID: rack-oauth2: access_token!: ssl_cert_file_or_dir: #{ssl_cert_file_or_dir}")
+        Rails.logger.error("OpenID: rack-oauth2: access_token!: ssl_version: #{ssl_version}")
+
+
         http_client = Rack::OAuth2.http_client
         http_client.ssl_config.set_default_paths if use_system_ssl
         http_client.ssl_config.add_trust_ca(ssl_cert_file_or_dir) if ssl_cert_file_or_dir
+        http_client.ssl_config.ssl_version(ssl_version) if ssl_version
 
         # NOTE:
         #  Using Array#estract_options! for backward compatibility.
         #  Until v1.0.5, the first argument was 'client_auth_method' in scalar.
+        Rails.logger.error("OpenID: rack-oauth2: access_token!: args: #{args}")
         options = args.extract_options!
         client_auth_method = args.first || options.delete(:client_auth_method) || :basic
+        Rails.logger.error("OpenID: rack-oauth2: access_token!: client_auth_method: #{client_auth_method}")
 
         params[:scope] = Array(options.delete(:scope)).join(' ') if options[:scope].present?
         params.merge! options
@@ -114,6 +125,7 @@ module Rack
           params.merge!(
             client_id: identifier
           )
+          Rails.logger.error("OpenID: rack-oauth2: access_token!: mtls params: #{params}")
           http_client.ssl_config.client_key = private_key
           http_client.ssl_config.client_cert = certificate
         else
@@ -122,6 +134,9 @@ module Rack
             client_secret: secret
           )
         end
+        Rails.logger.error("OpenID: rack-oauth2: access_token!: http_client.ssl_config cert_store_crl_items: #{http.ssl_config.cert_store_crl_items}")
+
+        Rails.logger.error("OpenID: rack-oauth2: access_token!: http_client.post params: #{params}")
         handle_response do
           http_client.post(
             absolute_uri_for(token_endpoint),
