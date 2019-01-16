@@ -132,7 +132,7 @@ module Rack
             client_secret: secret
           )
         end
-        Rails.logger.error("OpenID: rack-oauth2: access_token!: http_client.ssl_config cert_store_crl_items: #{http.ssl_config.cert_store_crl_items}")
+        Rails.logger.error("OpenID: rack-oauth2: access_token!: http_client.ssl_config cert_store_crl_items: #{http_client.ssl_config.cert_store_crl_items}")
 
         Rails.logger.error("OpenID: rack-oauth2: access_token!: http_client.post params: #{params}")
         handle_response do
