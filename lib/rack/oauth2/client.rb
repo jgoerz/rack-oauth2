@@ -82,7 +82,7 @@ module Rack
         http_client = Rack::OAuth2.http_client
         http_client.ssl_config.set_default_paths if use_system_ssl
         http_client.ssl_config.add_trust_ca(ssl_cert_file_or_dir) if ssl_cert_file_or_dir
-        http_client.ssl_config.ssl_version(ssl_version) if ssl_version
+        http_client.ssl_config.ssl_version = ssl_version if ssl_version
 
         # NOTE:
         #  Using Array#estract_options! for backward compatibility.
