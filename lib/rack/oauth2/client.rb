@@ -121,7 +121,8 @@ module Rack
           )
         when :mtls
           params.merge!(
-            client_id: identifier
+            client_id: identifier,
+            client_secret: secret
           )
           Rails.logger.error("OpenID: rack-oauth2: access_token!: mtls params: #{params}")
           http_client.ssl_config.client_key = private_key
